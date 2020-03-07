@@ -1,0 +1,226 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Metoda končnih elementov: Poissonova enačba}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Polkrožna cev}
+
+Spet bomo reševali Poissonovo enačbo $\nabla^2 u = -f$, tokrat jo bomo prevedli na variacijski problem. Iščemo ekstrem sledečega funkcionala
+\begin{equation*}
+S(u) = 1/2 \langle \nabla u, \nabla u \rangle -  \langle f,u \rangle
+\end{equation*}
+Kjer skalarni produkt definiramo na sledeč način
+\begin{equation*}
+\langle g,h \rangle = \int_\Omega dx g(x) h(x) 
+\end{equation*}
+
+Po metodi Galerkina rešitev naše enačbe zapišemo kot linearno kombinacijo trial funkcij
+\begin{equation*}
+u = \sum_{i=1}^N a_i w_i
+\end{equation*}
+Za funkcije $w_i$ bom vzel funkcijo, ki je v $x_i$ enaka ena, na sosedih enaka nič, vmes pa linearno narašča. S tako izbiro nam bodo koeficienti $a_i$ povedali kar vrednost rešitve u v točki $x_i$.
+
+Če zgornji funkcional variramo dobimo:
+\begin{align*}
+&\sum_{j=1}^N \langle \nabla w_i , \nabla w_j \rangle a_j = \langle f , w_i \rangle \\
+&\sum_{j=1}^N A_{ij} a_j = b_i
+\end{align*}
+
+V tej nalogi bom na mojih problemih izvajal triangulacijo domene. To pomeni, da bom domene razdelil na majhne trikotničke v nasprotju z kvadratno mrežo s katero smo imeli do sedaj opravka.
+
+r-ti trikotnik bo podan z koordinatami treh oglišč $((x_i,y_i),(x_j,y_j),(x_k,y_k))_r$
+Ploščina r-tega trikotnika je $S_r = 1/2( x_i(y_j - y_k) + cikl. perm)$
+
+
+Po nekaj računih dobimo skalarne produkte, katere potrebujemo:
+
+\begin{align*}
+&A_{ij} = \sum ((x_j - x_k)(x_k - x_i) + (y_j - y_k)(y_k-y_i))/4S_r \\
+&b_i = -1/3 \sum S_r
+\end{align*}
+
+Prva vsota gre po vseh trikotnikih ob zveznici i-j, druga pa gre po vseh trikotnikih ob točki i.
+Izkazalo se je, da algoritem deluje veliko bolje in hitreje, če namesto po točkah iteriram po trikotnikih. Formule so podobne.
+
+
+\section{Polkrožna cev}
+
+Najprej bom narisal nekaj slik, pri katerih sem povsod risal z 200 točkami, od tega jih je četrtina bila na robu. Triangulacijo sem delal z scipy-jevo metodo Delaunay, matrični sistem pa na koncu rešil z linalg.solve
+Poiseuillov koeficient sem računal tako, da sem povprečil vrednost pretoka po vseh 3 ogliščih trikotnika, pomnožil s ploščino trikotnika in to seštel po vseh trikotnikih.
+
+Začnimo z naključnimi točkami porazdeljeni po enakomerni porazdelitvi po polkrogu:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random2.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random3.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+Presenetljivo sta profil in Poiseuillov koeficient zelo podobna za vse 3 primere, čeprav so najmanjši koti zelo različni. Spomnem naj, da je pravi C za polkrog približno 0.758
+
+
+Poglejmo si še primer, kjer notranjost pokroga zapolnem z bolj simetrično mrežo in dodam še rob:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/enakomerna.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/enakomerna2.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+Taka triangulacija seveda še vedno ni optimalna, vendar vidimo, da je boljša kot random, saj dobimo Poiseuillov koeficient za kake 0.01 bližje pravi vrednosti. Hkrati na spodnji sliki vidimo, da izbira več točk po pričakovanju da boljši rezultat, ki je že zelo blizu pravi vrednosti. Spomnim naj, da sem v peti nalogi z relaksacijo na navadni mreži dobil za koeficient 0.779 kar je slabše.
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/odvisnost.pdf}
+\end{subfigure}
+\caption*{Videl sem, da vpliv najmanjšega kota ni viden na Poiseuillovem koeficientu, zato sem tukaj preveril še vpliv deleža točk na robu. V notranjosti polkroga sem imel fiksno 600 točk na rob pa sem jih pol dodal toliko da dobim primeren delež. Graf je zato pristranski saj število točk ni fiksno, pa tudi ker so trikotniki zelo različni. Delal sem sicer vedno z enakomernimi(nenaključnimi) točkami. Vseeno vidimo, da se koeficient tudi tukaj komaj spreminja.}
+\end{figure}
+
+
+V naslednjih slikah sem pretok narisal še z programom FreeFem++, ki sam pametneje izbere triangluacijo:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/polkrogmesh.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/polkrog.pdf}
+\end{subfigure}
+\caption*{Tukaj je na robu 200 točk}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/polkrogmesh2.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/polkrog2.pdf}
+\end{subfigure}
+\caption*{Tukaj je na robu 40 točk}
+\end{figure}
+
+
+\section{Mačkasta cev}
+
+V tem primeru se zapolnitev cevi z pravilnimi trikotnimi ni obnesla(matrika je bila singularna). Vedno sem torej izbral random točke. Poiseuillov koeficient za mačko iz pete naloge je 0.34585.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/random.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/random2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/random3.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/random4.pdf}
+\end{subfigure}
+\caption*{Če izberemo premalo točk seveda sploh ne moremo dobro opisati mačke. (Na levi nekje delno ni roba, ker sem trikotnike, ki imajo vse točke na robu odstranil, da jih Delaunay ne poveže zunaj domene}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/random5.pdf}
+\end{subfigure}
+\caption*{To se je v manjši meri pojavilo že pri prejšnjih primerih, vendar če je točk v mački veliko več kot na robu, jih lahko poveže v trikotnike preko območij, ki so izven domene, kar ni dobro(v tem primeru kakšna velika napaka sicer ni opazna)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/odvisnost.pdf}
+\end{subfigure}
+\caption*{Metoda SOR na matriki za triangulirano mačko z random točkami. Gledal sem normo razlike med zadnjim in predzadnjim vektorjem pri iteraciji.}
+\end{figure}
+Še rešitve z freefem:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/mesh.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/prva.pdf}
+\end{subfigure}
+\caption*{Tukaj je na robu 140 točk}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/mesh2.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/druga.pdf}
+\end{subfigure}
+\caption*{Tukaj je na robu 700 točk}
+\end{figure}
+\end{document}

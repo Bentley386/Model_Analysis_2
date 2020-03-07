@@ -1,0 +1,219 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Parcialne diferencialne enačbe: robni problemi in relaksacija}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Poiseuillov koeficient}
+
+Za reševanje parcialnih diferencialnih enačb z robnimi pogoji bom uporabil naslednje metode, vse povezane z diskretizacijo odvodov.
+Reševal bom enačbo $\nabla^2 u = - q$
+
+Za reševanje diskretiziranega sistema bom uporabil Jacobijevo in Gauss-Seidelovo iteracijo, kateri se glasita:
+\begin{align*}
+&u^{n+1}_{jk} = 0.25 \left( \sum_{nn} u^n + h^2 q_{jk}\right) \\ 
+&u_{jk}^{n+1} = \frac{h^2}{4} \left( q_{jk} + \frac{1}{h^2} (u^{n}_{j+1,k} + u^{n+1}_{j-1,k}) + \frac{1}{h^2} (u^{n}_{j,k+1} + u^{n+1}_{j,k-1})\right)
+\end{align*}
+
+Zgornji enačbi v taki obliki veljata, če mrežo diskretiziram v x in y smeri z enakim odmikom h. Superscript n predstavlja n-ti približek za rešitev, j in k pa sta koordinati v diskretizirani mreži. Vsota po nn pomeni vsota po najbližjih sosedih mesta j,k.
+
+Zgornji metodi bom poskusil izboljšati z metodo SOR, ki se zapiše kot:
+\begin{equation*}
+u_i^{n+1} = u_i^n + \omega(\tilde{u}_i^n - u_i^n)
+\end{equation*}
+Kjer je $\tilde{u}$ rešitev pridobljena z Jacobijevo oziroma Gauss-Seidelovo metodo.
+
+Najprej bom metodo testiral na podobnem primeru, katerega sem enkrat že obravnaval in imam torej pravilne rešitve za referenco.
+Takrat sem izračunal Poiseuillov koeficient za pretok skozi kvadratno cev:
+
+Rešujem torej enačbo(v primernih enotah) 
+\begin{equation*}
+\nabla^2 u = - 1
+\end{equation*}
+Zanimal nas bo Poiseuillov koeficient, ki ga bom dobil kot
+\begin{equation*}
+C = \frac{8\pi}{S^2} \int_0^1 \int_0^1 u(x,y) dx dy
+\end{equation*}
+
+Spomnimo se, da za pravokotno cev s stranicama a in b velja enačba
+
+\begin{equation*}
+C = 2\pi \frac{b}{a}\Big( \frac{1}{3} - \frac{b}{a} \frac{64}{\pi^5} \sum_{n=1}^{\infty} \frac{tanh(\frac{a}{b} \frac{(2n-1)\pi}{2})}{(2n-1)^2}\Big)
+\end{equation*}
+Za kvadratno cev (a=b=1) nam to da 0.8832714348933981
+Sedaj ko vemo pravo rešitev, primerjajmo hitrost različnih metod:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/hitrosti20.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/hitrosti40.pdf}
+\end{subfigure}
+\caption*{Chebyshev in Gaussov SOR sta zelo blizu, obe pa približno za red velikosti hitrejši od navadnega Gaussa in Jacobija. Za SOR je bil uporaljen domnevno optimalen $\omega$ iz navodil. S tako diskretizacijo mreže sem dobil $C \approx 0.83$}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/hitrosti100.pdf}
+\end{subfigure}
+\caption*{Tukaj se lepo vidi prednost boljših algoritmov. Navaden Jacobi in Gauss v tem času(nekaj minut) sploh nista še prišla do rešitve, medtem ko sta ostali dve metodi že natančni. Tukaj sem dobil $C \approx 0.865$ kar je že bližje pravi vrednosti od redkejše mreže.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/omege.pdf}
+\end{subfigure}
+\caption*{Tukaj sem iskal optimalen $\omega$ za najhitrejšo konvergenco in primerjal z pričakovanim, ki je $\omega = 2/(1+\alpha \pi/J)$. $\alpha$ bi za kvadratno mrežo moral biti 1.}
+\end{figure}
+
+
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profilkvadratlanski.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profilkvadrat.pdf}
+\end{subfigure}
+\caption*{Na levi je profil iz lanskega praktikuma, na desni pa profil pridobljen s Chebyshevim pospeškom. Oblika in vrednosti sovpadata. Lani očitno pri risanju slike nisem postavil aspect razmerja osi na 1.}
+\end{figure}
+
+Ker lahko to hitro naredimo, preverimo še za pretok skozi okroglo cev, kjer je C po definiciji enak 1.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profilkrog.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/krogomege.pdf}
+\end{subfigure}
+\caption*{Parameter alfa je torej v tem primeru nekoliko manjši. Pridobljen koeficient je $C=1.0046158152102151$, kar je že zelo blizu pravi vrednosti. Na desni vidimo, da se pri omega blizu 2 metoda hitro poslabša.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/polkrogomege.pdf}
+\end{subfigure}
+\caption*{Podoben graf kot prej še za polkrožen profil.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profil.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profilpolkrog.pdf}
+\end{subfigure}
+\caption*{Na levi lanski profil, lani izračunan C je bil 0.758. Na desni zdajšnji profil z C=0.779. Številske vrednosti se kar razlikujejo, vendar sem bil tukaj bolj hiter in neustrezno diskretiziral mrežo, kot je videno na sliki.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/profilmacka.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/mackaomege.pdf}
+\end{subfigure}
+\caption*{Še profil skozi cev v obliki mačke, izračunan C je 0.34585.}
+\end{figure}
+\newpage
+
+\section{Toplotni profil}
+
+Naša naslednja naloga je izračunati toplotni profil v enakostraničnem valju, kjer na spodnji ploskvi grejemo s konstantnim toplotnim tokom, zgornjo plosco pa izoliramo. Plašč držimo pri konstantni temperaturi. Imamo torej mešanico Dirichletovih in Neumannovih robnih pogojev. Z Dirichletovimi smo se spopadli že v prvi nalogi, za Neumannove pa bom enostavno odvod aproksimiral z diferenco in zahteval, da je enak določenem številu.
+
+Ker gledamo stacionaren profil brez izvorov, rešujemo tokrat Laplacovo enačbo:
+\begin{align*}
+&\nabla^2 T = 0 \\
+&\frac{\partial^2 T}{\partial r^2} + \frac{1}{r} \frac{\partial T}{\partial r} + \frac{\partial^2 T}{\partial z^2} = 0 
+\end{align*}
+
+Po diskretizraciji odvodov dobimo enačbo
+\begin{align*}
+&\left(1+\frac{1}{2j}\right) T_{j+1,k} + \left(1-\frac{1}{2j}\right) T_{j-1,k} + \frac{1}{4} T_{j,k+1} + \frac{1}{4} T_{j,k-1} - \frac{5}{2} T_{j,k} = 0 \\
+&a_{j,k} T_{j+1,k} + b_{j,k} u_{j-1,k} + c_{j,k} u_{j,k+1} + d_{j,k} u_{j,k-1} + e_{j,k} u_{j,k} = f_{j,k} 
+\end{align*}
+Naša PDE je še vedno eliptična, torej lahko uporabimo naslednjo iteracijsko shemo:
+\begin{align*}
+&T_{j,k}^{n+1} = T_{j,k}^{n} + \omega (\tilde{T}_{j,k}^{n}-T_{j,k}^{n}) \\
+&\tilde{T}_{j,k} = \frac{1}{e_{j,k}} ( f_{j,k} - a_{j,k} T_{j+1,k} - b_{j,k} T_{j-1,k} - c_{j,k} T_{j,k+1} - d_{j,k} T_{j,k-1}) \\
+&\tilde{T}_{j,k} = \frac{2}{5} \left( \left(1+\frac{1}{2j}\right) T_{j+1,k} + \left(1-\frac{1}{2j}\right)T_{j-1,k} + \frac{1}{4} T_{j,k+1} + \frac{1}{4} T_{j,k-1} \right)
+\end{align*}
+
+Neumannov robni pogoj se potem enostavno glasi(npr, če je spodnji del valja pri k):
+\begin{equation*}
+(T_{j,k+1}-T_{j,k-1})/(2h) = K 
+\end{equation*}
+Pola pri j=0 se bom rešil na naslednji način: Za koordinate r definiram: $r_j = h*j + h/2$. To nas tudi reši levega robnega pogoja(pri r=0).
+S takim izborom koordinat težje natančno ustrežemo robnemu pogoje, da je na plašču(ki s temi koordinatami ni dostopen) določena temperatura. Vendar pa bi bilo logično, da pri dovolj majhnem h to ne bo težava. Poleg tega rečem, da je moj valj v nekakšnem rezervoarju, kjer držim robno temperaturo fiksno na nič.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{valj.pdf}
+\end{subfigure}
+\caption*{Na x osi je koordinata r, na y osi pa koordinata z. Pri tako majhnem toku je razlika med zgornjo in spodnjo ploskvijo komaj opazna.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{valj2.pdf}
+\end{subfigure}
+\caption*{Pri večjem toku je razlika bolj vidna.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{valj4.pdf}
+\end{subfigure}
+\caption*{Robni pogoj na plašču, kjer je zgornja polovica na dvakrat višji temperaturi kot spodnja povzroči veliko bolj zanimiv profil.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{valj3.pdf}
+\end{subfigure}
+\caption*{Večji tok še dodatno zlomi simetrijo}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{omege.pdf}
+\end{subfigure}
+\caption*{Še odvisnost (Frobeniusove) norme razlike matrik zadnjih dveh iteracij od omege.}
+\end{figure}
+\end{document}

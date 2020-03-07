@@ -1,0 +1,179 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Direktno reševanje Poissonove enačbe}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Poves opne}
+
+V tej nalogi bomo izkoristali dejstvo, da znamo nekatere enačbe v določenih preprostih geometrijah in z preprostimi robnimi pogoji delno ali v celoti analitično rešiti.
+Začnimo z neobteženo kvadratno opno, rešujemo enačbo(v ustreznih enotah)
+\begin{equation*}
+\nabla^2 u(x,y) = -p(x,y)
+\end{equation*}
+Z Dirichletovimi robnimi pogoji $u(x,y)=0$ na robu.
+
+Z izbiro sinusne Fouriere transformacije bomo robne pogoje že takoj upoštevali:
+\begin{align*}
+&G^{mn} = \sum_{j=1}^{J-1}\sum_{l=1}^{L-1} g_{jl} \sin \frac{\pi j m}{J} \sin \frac{\pi l n}{L} \\
+&U^{mn} = \sum_{j=1}^{J-1}\sum_{l=1}^{L-1} u_{jl} \sin \frac{\pi j m}{J} \sin \frac{\pi l n}{L} \\
+\end{align*}
+
+Vstavimo v enačbo(Laplacian zapišemo v diskretni obliki) in dobimo:
+\begin{equation*}
+U^{mn} = h^2/2 \frac{G^{mn}}{\cos(\pi m/J) + \cos(\pi n / L) - 2}
+\end{equation*}
+
+Rešitev dobimo z inverzno sinusno transformacijo:
+\begin{equation*}
+u_{jl} = \frac{2}{J}\frac{2}{L} \sum_{m=1}^{J-1} \sum_{n=1}^{L-1} U^{mn} \sin \frac{\pi j m}{J} \sin \frac{ \pi l n }{L}
+\end{equation*}
+
+Še ena možnost je, da Fourierovo transformacijo napravimo le v eni izmed dimenzij(izbral si bom x), v drugi nam potem ostane preprosta diferenčna shema
+\begin{align*}
+&U^m_l = \sum_n u_{ln} \sin \frac{\pi n m}{N} \\
+&G^m_l = \sum_n g_{ln} \sin \frac{\pi n m}{N} \\
+&U_{l-1}^m - U_l^m (4- 2 \cos(m \pi/J)) + U_{l+1}^m = h^2 G_l^m 
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{kalibracija.pdf}
+\end{subfigure}
+\caption*{Najprej na hitro preverimo kakšen je optimalen omega za SOR v tem primeru. Rezultat po 50 iteracijah primerjamo s tistim, ki smo ga dobili tako, da smo iterirali dokler ni bil rezidum 0.0001(pribl 500 iteracij)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{1dfour1000.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{2dfour1000.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{SOR100.png}
+\end{subfigure}
+\caption*{SOR je bil tako počasen, da sem ga raje izvedel na manjši mreži. Vidimo, da naše 3 metode dajo smiselen rezultat.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{hitrosti.pdf}
+\end{subfigure}
+\caption*{Tukaj vidimo, zakaj se splača uporabiti Fourierovo metodo, kljub temu, da nam SOR da prave rezultate. Veliko hitrejša je, pa tukaj je bil zaustavitveni pogoj za iteracijo še majhen - norma 0.1 vektorja reziduala.}
+\end{figure}
+
+Poglejmo si še obteženo opno, kjer je ta obtežena po porazdelitvi mase kot v 6. nalogi(glej 6. nalogo za sliko)
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{obtezena/1dfour1000.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{obtezena/2dfour1000.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{obtezena/sor100.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\section{Temperaturni profil}
+
+Spet rešujemo temperaturni profil v valju.
+Če zapišemo Laplacian v cilindričnih koordinatah dobimo:
+\begin{equation*}
+\frac{\partial^2 u}{\partial r^2} + \frac{1}{r} \frac{\partial u}{\partial r} + \frac{\partial^2 u}{\partial z^2} = 0
+\end{equation*}
+
+Tisto deljenje z radijem je grdo, če bi se zadeve lotili z Fourierovo transformacijo v r smeri. Zato jo bomo delali le v z smeri, v r smeri pa obdržali diferenčno shemo. 
+
+Naši robni pogoji so, da imamo določeno temperaturo $T_1$ na osnovnih ploskvah valja, ter temperaturo $T_2$ na plašču.
+Za toplotni profil rešujemo Laplacevo enačbo $\nabla^2 T = 0$. Lahko definiramo novo spremenljivko $u = T - T_1$, za katero se enačba spet glasi $\nabla^2 u = 0$, s tem da imam sedaj za u homogeni robni pogoj v z smeri in lahko spet uporabimo sinusno transformacijo. Na plašlu bomo potem zahtevali temperaturo $T_2-T_1$ na koncu pa spet prešli na spremenljivko T $T = u  + T_1$
+
+Dobimo:
+\begin{align*}
+&\frac{u^j_{k+1} + u^j_{k-1} - 2u^j_k}{h^2} + \frac{1}{kh} \frac{u^j_{k+1} - u^j_{k-1}}{2h} + \frac{u^j_k}{h^2}\left(2 \cos(\pi*j/N)-2\right) = 0 \\
+& \left(2 \cos(\pi j /N) - 4 \right) u^j_k + \left(1 - \frac{1}{2k} \right) u^j_{k-1} + \left(1 + \frac{1}{2k} \right) u^j_{k+1} = 0  \\
+&\tilde{u}^j_k = \frac{1}{2 \cos(\pi j /N) - 4}\left(-\left(1 - \frac{1}{2k} \right) u^j_{k-1} - \left(1 + \frac{1}{2k} \right) u^j_{k+1} \right) \\
+&\tilde{u}^j_k = \frac{1}{2 \cos(\pi j /N) - 4}\left(-\left(1 - \frac{1}{2k} \right) u^j_{k-1} - \left(1 + \frac{1}{2k} \right) u^j_{k+1} \right) \\
+&u^{j(n+1)}_k = u^{j(n)}_k + \omega \left( \tilde{u}^{j(n)}_k - u^{j(n)}_k \right)
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{toplotni1.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{toplotni2.png}
+\end{subfigure}
+\caption*{Slike pridejo takšne kot jih pričakujemo}
+\end{figure}
+
+
+Na hitro preverimo še če bi šlo z Neumannovim robnim pogojem. V tem primeru bi fiksiral tok na ploksvi in uporabil kosinusno transformacijo.
+Nova spremenljivka bi se glasila $T = u + z* j$, kjer ima u ničelni odvod na robu. 
+
+
+\section{Sinusna transformacija}
+
+Scipyjeva funkcija za večdimenzionalno sinusno transformacijo mi je nekako dajala napačen rezultat in se zdela nekako čudno definirana.
+
+Zato sem jo raje sprogramiral sam z učinkovitim algoritmom iz knjige Numerical Recipes, ki ga bom na kratko napisal tu:
+
+Iz naših podatkov $f_j$ želimo dobiti sinusno transformiranko $F_k$. Najprej tvorimo novo zaporedje:
+\begin{align*}
+&y_0 = 0 \\
+&y_j = \sin(j*\pi/N) (f_j + f_{N-j}) + 0.5(f_j - f_{N-j}) 
+\end{align*}
+
+Na zaporedju y uporabimo algoritem za realen FFT. Izkaže se, da je realni del te transformiranke enak $F_{2k+1} - F_{2k-1}$, imaginarni pa $F_{2k}$.
+Tako takoj dobimo sode člene naše sinusne transformacije, za lihe pa prvega dobimo z uporabo dejstva $F_1 = -F_{-1}$ ostale pa iz le-tega rekurzivno.
+
+
+
+\end{document}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}
+
+

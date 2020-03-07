@@ -1,0 +1,192 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Hartree-Fockova metoda}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+\section{Atom helija}
+Našo valovno funkcijo dveh elektronov zapišemo s Slaterjevo determinanto, kjer za enodelčne funkcije uporabimo
+\begin{equation*}
+\varphi_{1s} = \frac{1}{4\pi} \frac{R(r)}{r}
+\end{equation*}
+z nekaj matematike in substitucijo $x=r/a$ dobimo:
+\begin{equation*}
+E = 2E_0 \int dx \left( R'(x)^2 - \frac{2Z}{x} R(x)^2 - \Phi(x) R(x)^2 \right)
+\end{equation*}
+$\Phi$ je potencial katerega lahko dobimo po integraciji Poissonove enačbe:
+\begin{equation*}
+\Phi(x) =- \frac{1}{x} \int_0^x R^2(y) dy - \int_x^{\infty} \frac{R^2(y)}{y} dy
+\end{equation*}
+
+Z variacijo energije dobimo enačbo
+\begin{equation*}
+\left( \frac{d^2}{dx^2} + \frac{2Z}{x} + 2 \Phi + \epsilon \right) R(x) = 0
+\end{equation*}
+
+Problem zdaj rešujemo iterativno: Izberemo si začetni približek za R in ga vstavimo v enačbo za potencial $Phi$, iz le tega lahko z variacijo energije dobimo nov približek za R. Postopek ponavljamo do konvergence.
+Diferencialno enačbo bom reševal z metodo numerova, kjer bom spet z bisekcijo iskal kdaj točno pademo na nič, integriral pa bom z simpsonovo metodo.
+Dober začetni približek je (nekako motiviran iz rešitve enodelčne Schr. enačbe)
+\begin{equation*}
+R^0(x) = 2 \sqrt{Z-5/16} x (Z-5/16) exp(-(Z-5/16)x)
+\end{equation*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energije.pdf}
+\end{subfigure}
+\caption*{Očitno je začetni približek zelo dober, saj skoraj po prvi iteraciji praktično energija že skonvergira in je zelo blizu eksperimentalni vrednosti -78.88.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije.pdf}
+\end{subfigure}
+\caption*{Tako izgledata zgoraj definirani valovni funkciji enega elektrona, ter potencial, katerega čuti. Področje integracije do x=7 sem delno uganil, saj pa lahko tudi predvidevamo, da bo valovna funkcija padla na 0 nekje na razdalji reda velikosti Bohrovega radija.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energije2.pdf}
+\end{subfigure}
+\caption*{Tukaj sem izbral malce bolj naiven začetni približek(viden v naslovu). Energija spet hitro skonvergira na dokaj natančno vrednost, a vidi se, da je začetni približek zelo falil energijo.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije2U.pdf}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije2R.pdf}
+\end{subfigure}
+\caption*{Še prikaz konvergence funkcij potenciala in R tekom iteracije. Prvi približek je malce slabo viden, pri potencialu je bolj pri vrhu, pri funkciji pa majhen hribček na dnu slike.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energije3.pdf}
+\end{subfigure}
+\caption*{Še malce drugačen primer. Tokrat se pri iskanju primerne energije v prvem koraku iteracije še malo oddaljimo od pravega rezultata.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije3U.pdf}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije3R.pdf}
+\end{subfigure}
+\caption*{Lepo skonvergira čeprav je začetni približek zelo faljen.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energije4.pdf}
+\end{subfigure}
+\caption*{Z sinusnim začetnim približkom vseeno konvergiramo presenetljivo hitro.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije4U.pdf}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcije4R.pdf}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/energije5.pdf}
+\end{subfigure}
+\begin{subfigure}{.45\textwidth}
+\includegraphics[width=\linewidth]{prva/energije6.pdf}
+\end{subfigure}
+\caption*{Še dva primera. Zgoraj neomejen začetni približek ter močnejše oscilajoča funkcija. Vseeno hitro skonvergiramo do rešitve. Če vzamemo zelo hitro naraščujočo funkcijo(npr eksponentno) pa ne konvergira.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcijeR5.pdf}
+\end{subfigure}
+\caption*{Prikaz konvergence valovne funkcije z oscilajočim začetnim približkom. Tistega z kvadratičnim ne bom prikazoval, ker so razlike med začetnim približkom in dejansko funkcijo tako veliko, da se nič ne vidi.}
+\end{figure}
+
+\section{Ostali atomi}
+
+Začnimo z atomom $Li^{+}$. Uporabil bom isto metodo, le da bom namesto Z=2 vstavil Z=3. Rezulati:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energijelitij.pdf}
+\end{subfigure}
+\caption*{Pridemo blizu eksperimentalni vrednosti -198.04.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcijelitij.pdf}
+\end{subfigure}
+\caption*{Še oblika potenciala ter valovne funkcije. Podobno kot pri Helijevem atomu je tudi tukaj metoda zelo odporna na slabe začetne približke.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/energijevodik.pdf}
+\end{subfigure}
+\caption*{Metoda pod Z=1.1 ni več konvergirala. Za Z=1 sem torej moral ekstrapolirati iz znanih energij za večje Z. Na sliki so z črnimi pikami nakazane izračunane energije, modra pa je polinomski fit reda 4. Za Z=1 dobim energijo -13.23 kar je kar blizu eksperimentalni -14.34}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{prva/funkcijevodik.pdf}
+\end{subfigure}
+\caption*{Podobno sem se lotil za iskanej valovne funkcije R pri Z=1. Najprej sem kot prikazano na grafu narisal funkcije za nekaj drugih, bližnjih Z-jev, kjer je metoda še konvergirala. Iz teh sem potem po točkah fittal polinom in dobil R pri Z=1.}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

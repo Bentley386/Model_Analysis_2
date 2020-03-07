@@ -1,0 +1,281 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Metoda robnih elementov}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Elektroda}
+
+Tokrat bomo 2 dimenzionalno Laplaceovo enačbo reševali z metodo robnih elementov.
+Za 2-D Laplacovo enačbo poznamo Greenovo funkcijo in vemo, da lahko robne pogoje upoštevamo s pomočjo Greenove identitete:
+\begin{align*}
+&\nabla^2 u(x,y) = 0 \\
+&G(x,y;x_0,y_0) = \frac{1}{2\pi} \log \sqrt{(x-x_0)^2 + (y-y_0)^2} \\
+&u(r) = \int_S G(r;r_0) \frac{\partial u(r_0)}{\partial n} dS_0 - \int_S u(r_0) \frac{\partial G(r;r_0)}{\partial n} dS_0
+\end{align*}
+
+V naši nalogi imamo opravka z nabito elektrodo dolžine l. Izhodišče koordinatnega sistema si bom izbral na robovih elektrode, torej bosta robova elektode pri $x = \pm l/2$.
+
+Pri metodi robnih elementov elektorod razdelim na N odsekov $C_i$, pri kateri je koordinata i-tega enaka $(x_i,y_i) = \left(-\frac{l}{2}+\frac{l}{2N} + \frac{il}{N},0 \right)$
+
+S pomočjo Greenove funkcije lahko določimo prispevek k potencialu kjerkoli v prostoru, ki ga povzročajo vsi  odseki. Rešitev zapišemo kot konvolucijo Greenove funkcije z ploskovno gostoto naboja(desna stran pravzaprav Poissonove enačbe):
+\begin{align*}
+u(x,y) &= \sigma \frac{1}{4\pi} \int_{-l/2}^{l/2} \log ((x - \xi)^2 + y^2) d\xi = \\ 
+&= \frac{\sigma}{2\pi} \left( -l + y\left( \arctan(\frac{x_{-}}{y}) - \arctan(\frac{x_{+}}{y})\right) 
++ \frac{x_{-}}{2} \log(x_{-}^2+y^2)- \frac{x_{+}}{2} \log(x_{+}^2+y^2) \right) \\
+&x_{+} = x-l/2, \ x_{-} = x+l/2
+\end{align*}
+\begin{align*}
+&\vec{E} = - \vec{\nabla} u \\
+&E_x = -\frac{\sigma}{4\pi} \log( \frac{x_-^2 + y^2}{x_+^2 + y^2})\\
+&E_y = -\frac{\sigma}{2\pi} \left( \arctan(\frac{x_-}{y}) - \arctan(\frac{x_+}{y}) \right)\\
+\end{align*}
+
+Zgornjo formulo uporabimo na vsakem izmed odsekov in seštejemo prispevke, da dobimo celoten potencial.
+
+\begin{equation*}
+u(x,y) = \sum_{i=0}^{N-1} u_i(x,y)
+\end{equation*}
+
+Kjer je $u_i$ podoben kot zgoraj definiran u, le, da namesto $\sigma$ vstavimo $\sigma_i$ in namesto x vstavimo \\
+$x-\left(-\frac{l}{2} + \frac{l}{2N}+ \frac{i l}{N}\right)$
+
+Ploskovne gostote naboja so zaenkrat neznane. Dobimo jih lahko tako, da zahtevamo, da je potencial na celotnem traku konstanten, recimo kar ena:
+
+\begin{equation*}
+u_i = a_{ij} \sigma_j
+\end{equation*}
+Kjer je $a_{ij}$ ravno zgornji izraz, izračunan v sredini i-tega odseka.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/5.png}
+\end{subfigure}
+\caption*{Potencial, če elektrodo razdelimo na le dva robna elementa. Ne izgleda preveč slabo, a vseeno vidimo, da gre potencial ponekod čez 1 in, da imamo pravzaprav opravka z le dvema točkastima nabojoma.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/4.png}
+\end{subfigure}
+\caption*{Pri N=5 je malo boljše. Tisti del z visokim potencialom se malo bolj razleze in prilega palici}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/2.png}
+\end{subfigure}
+\caption*{Ta profil pa zgleda pravilen.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/wow.png}
+\end{subfigure}
+\caption*{Poleg potenciala so tukaj narisane še smeri električnega polja. Na koncema palice izgleda malo čudno, ker se tam stvari najbolj spreminjajo}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/naboj.pdf}
+\end{subfigure}
+\caption*{Še porazdelitev naboja po traku. Simetrična, kot bi pričakovali}
+\end{figure}
+
+
+\section{Obtekanje vode}
+
+Sedaj bom obravnaval še problem obtekanja vode okolli neke ovire. Za hitrostni potencial rešujemo spet isto enačbo, razlika bo v določanju gostote "naboja" na oviri. Tokrat nočemo, da je ta konstanta po oviri. Fizikalen robni pogoj je, da ob oviri hitrost tekočine nima normalne komponente, saj ta ne more teči v kovino. Fiksirano imamo hitrost tekočine nekje daleč od ovire, ki bo z določeno velikostjo kazala v x smeri. 
+
+Po analogiji iz prejšnje naloge rešujemo sistem $u_i = a_{ij} \sigma_j$, kjer je $u_i$ sedaj negativna projekcija hitrosti daleč od ovire na i-to plaketo, $a_{ij}$ predstavlja vpliv "vodnjaka" na j-ti plaketi na normalno komponento hitrosti na i-ti plaketi, $\sigma_j$ pa je "moč vodnjaka" na j-ti plaketi. 
+
+
+Za začetek naj bo ovira v obliki elipse, torej parametrizirana z kotom:
+\begin{align*}
+&x = \cos \varphi \\
+&y = b \sin \varphi
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{druga/elipsa1.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{druga/elipsa2.png}
+\end{subfigure}
+\caption*{b=1 seveda ustreza okrogli oviri.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.6\textwidth}
+\includegraphics[width=\linewidth]{druga/elipsa3.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+Bolj realistično NACA krilo dobimo z naslednjo formulo:
+\begin{equation*}
+y(x) = \frac{t}{50} \left( 1.457122 \sqrt{x} - 0.624424 x - 1.72016 x^2 + 1.384087 x^3 - 0.489769 x^4 \right)
+\end{equation*}
+
+Na naslednjiih slikah so določene jakosti polj zelo blizu ovire očitno napačne. Razlog je v tem, da so to deli puščic močnih polj v oviri in nas zato ne zanimajo.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca1.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca4.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca3.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca5.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca2.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/naca6.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+
+Še zadnji primer o tako imenovano krilo Žukovskega, ki ga dobimo na naslednji način
+\begin{align*}
+&(x,y) = (Re(z),Im(z)) \\
+&z = f\left(A + iB + r e^{i\varphi}\right) \\
+&f(z) = \frac{1}{2} \left( z + \frac{1}{z} \right) \\
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk1.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk3.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk2.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk4.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk5.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk6.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk7.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk8.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk9.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/zurk10.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.8\textwidth}
+\includegraphics[width=\linewidth]{druga/test.png}
+\end{subfigure}
+\caption*{Tukaj sem prikazal razliko x komponente hitrosti zgornjega in spodnjega dela krila. Večja razlika se zdi, da bi pripomorla k večji sili in boljšem krilu. X komponenta hitrosti je vedno izračunana v globalnem lokalnem sistemu, kar ni vedno podobno tangencialni hitrosti blizu krila, zato je ocena lahko napačna}
+\end{figure}
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}
+
+

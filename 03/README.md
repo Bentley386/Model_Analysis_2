@@ -1,0 +1,1 @@
+Solving the Schrödinger equation with the combination of Numerov and shooting method.

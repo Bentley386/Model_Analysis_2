@@ -1,0 +1,166 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Gibanje neraztegljive vrvice}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Uvod}
+V tej nalogi bomo podrobneje obravnavali gibanje neraztegljive vrvice.
+Spomnimo katere enačbe jo opisujejo:
+\begin{align*}
+&\frac{\partial ^2 x}{\partial t^2} = \frac{\partial}{\partial s} \left( F \frac{\partial x}{\partial s} \right) \\
+&\frac{\partial ^2 y}{\partial t^2} = \frac{\partial}{\partial s} \left( F \frac{\partial x}{\partial s} \right) + 1 \\
+&\left( \frac{\partial x}{\partial s} \right) ^2 + \left( \frac{\partial y}{\partial s} \right) ^2 = 1
+\end{align*}
+
+Pripadajoči robni pogoji so, da v pritrdišču $s=0$ velja $x=y=s=0$ ter, da na koncu $s=1$ velja $F=0$. O koordinatah konca vrvice nimamo podatka, izberemo si lahko, da je npr ukrivljenost enaka nič.
+
+Kot v tretji nalogi se tretje enačbe takoj rešimo, če uvedemo kot naklona vrvice:
+\begin{align*}
+& \frac{\partial x}{\partial s} = \cos \varphi \\
+& \frac{\partial y}{\partial s} = \sin \varphi \\
+\end{align*}
+
+Po nekaj manipulacijah dobimo enačbi:
+\begin{align*}
+&\frac{\partial^2 \varphi}{\partial t^2} = 2 \frac{\partial F}{\partial s} \frac{\partial \varphi}{\partial s} + F \frac{\partial^2 \varphi}{\partial s^2} \\
+& \frac{\partial^2 F}{\partial s^2} + \left( \frac{ \partial \varphi}{\partial t} \right) ^2 - F \left( \frac{\partial \varphi}{\partial s}\right) ^2 = 0
+\end{align*}
+
+Robna pogoja pri s=0 se v spremenljivki $\varphi$ glasita
+\begin{align*}
+&F \frac{\partial \varphi}{\partial s} + \cos \varphi = 0 \\
+& \frac{\partial F}{\partial s} + \sin \varphi = 0
+\end{align*}
+Robni pogoji pri s=1 pa
+\begin{align*}
+&F=0 \\
+&\frac{\partial^2 \varphi}{\partial s^2} = 0
+\end{align*}
+
+Zdaj bom robne pogoje in enačbe napisal še v diferenčni shemi. Subskript predstavlja krajevni indeks, superskript pa časovni.
+\begin{align*}
+&F_{i+1}^n -F_i^n \left( 2 + \left(\frac{\varphi_{i+1}^n -\varphi_{i-1}^n}{2}\right)^2 \right) + F_{i-1}^n = - \left( \frac{\Delta s}{\Delta t}\right) ^2 \left( \varphi_i^n - \varphi_i^{n-1}\right)^2 \\
+&F_0^n = F_1^n + \Delta s \sin \varphi_0 \\
+&F_N^n = 0
+\end{align*}
+Za odvod po kraju sem vzel simetriziran odvod, da enačba za robni pogoj ni transcendentna.
+
+\begin{align*}
+&\varphi_i^{n+1} = 2 \varphi_i^n - \varphi_i^{n-1} + \left(\frac{\Delta t}{\Delta s} \right)^2 \left( 2 \frac{F_{i+1}^n - F_{i-1}^n}{2} \frac{\varphi_{i+1}^n - \varphi_{i-1}^n}{2} + F_i^n ( \varphi_{i+1}^n - 2 \varphi_i^n + \varphi_{i-1}^n ) \right) \\
+&\varphi_0^{n+1} = \varphi_2^{n+1} + \frac{2 \Delta s}{F_1^{n+1}} \cos(\varphi_1^{n+1}) \\
+&\varphi_N^{n+1} = 2 \varphi_{N-1}^{n+1} - \varphi_{N-2}^{n+1}
+\end{align*}
+
+
+\section{Rezultati}
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{nihanje1.pdf}
+\end{subfigure}
+\caption*{Test metode pri začetnem pogoju, ravne vrvice pri kotu pi/3. Veliki delta predstavlja pri kakšni diskretizaciji sem računal, mali pa pri kakšni sem rezultat prikazal. Nihanje te vrvice je prikazano v animaciji nihanje.mp4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{energija1.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{napake1.pdf}
+\end{subfigure}
+\caption*{Ta grafa ustrezata zgornjem primeru. Energija se praviloma ohranja(kaj je tisti hribček bo mogoče vidno na animaciji) in lepo monotono konvergira z N.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{nihanje3.pdf}
+\end{subfigure}
+\caption*{Še malo drugačen začetni pogoj. Tokrat med nihanjem konec vrvice še malo zavihti.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{energija3.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{napake3.pdf}
+\end{subfigure}
+\caption*{Energija se vmes spet malo spremeni, konvergenca pa je spet monotona, ampak je začetna napaka večja kot pri prejšnjem primeru. Začeti sem moral pri N=20, saj je pri N=10 prihajalo do nekih napak z neskončnostmi}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{nihanje2.pdf}
+\end{subfigure}
+\caption*{Še ena oblika začetne niti.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{energija2.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{napake2.pdf}
+\end{subfigure}
+\caption*{Velik vrh kinetične energije pri neki točki. Upam da bomo to spet videli na animaciji. Napaka okoli N=20 sunkovito naraste, kar bom tudi poskusil razložiti z animacijo.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+\includegraphics[width=\linewidth]{napake22.pdf}
+\end{subfigure}
+\caption*{Konvergenca, če začnemo pri N=30 in se izognemo tistemu skoku. Tokrat ni čisto monotona ampak gre malce čez pravo vrednost in nazaj.}
+\end{figure}
+
+\subsection{Animacije}
+\begin{itemize}
+\item V animaciji nihanje2.mp4 vidimo nihanje zadnjih dveh primerov vrvic ter nihanje ravne vrvice pri zelo majhnem zacetnem kotu (pi/10). V teh primerih se ob določenem času vrvica zvije v zanko, kar povzroči, da koti začnejo močno naraščati dokler ne postanejo "nan" in se vse skupaj poruši (Točnega razloga nisem našel, se je pa to zgodilo pri vsakem zrušenju). Tega nisem znal popraviti, poskusil sem z več tridiagonalnimi solverji (SOR,Thomas,Sparse) in z raznimi modulo 2*pi v metodi pa ni pomagalo.
+ 
+
+\item Animacija napake.mp4 je bila narejena za iskanje vzroka tistega velikega skoka energije pri N=20 v drugem primeru. V animaciji začne tudi N=30 divergirati, ko se enkrat spet zazanka(tega na grafu napake energije ni bilo vidno, ker je bila eneregija izračunana že pri t=1.5). Uporaben rezultat iz animacije pa je, da je manjše število N lahko boljše. Sicer je vrvica seveda manj natančno opisana, a je metoda bolj stabilna, težje se namreč naredijo zanke.
+
+\item V animaciji ravnistar.mp4 so prikazana razna gibanja vrvic z začetnim pogojem ravne vrvice pri različnih kotih. Za boljšo stabilnost je bil izbran N=20.
+
+\item V animaciji ukrivljenstart.mp4 je prikazana podobna stvar le da začnemo z različno nagnjenimi ukrivljenimi vrvicami. Tukaj vidim, da so nekatere vrvice obstale še nekaj časa po tvori zankic, tako da nisem več prepričan, če je to razlog za nestabilnost. Spet sem izbral N=20, vidimo, da lepo obstanejo samo tiste, ki so začele z velikim kotom(merjen od horizontale)
+
+\item V animaciji vecinfo.mp4 je čisto prvi primer prikazan v počasnejsem posnetku, s tem da je zraven za vsak čas prikazana se porazdelitev sil in hitrosti po dolžini vrvice.
+\end{itemize}
+
+
+\end{document}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}
+
+

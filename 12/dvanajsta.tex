@@ -1,0 +1,192 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Navier - Stokesov sistem}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Reševanje sistema}
+
+Gibanje viskozne nestisljive tekočine opisujeta Navier - Stokesova enačba in kontinuitetna enačba:
+\begin{align*}
+& \rho \left(\frac{\partial \vec{v}}{\partial t} + (\vec{v} \cdot \nabla) \vec{v} \right)= -\nabla p + \eta \nabla^2 \vec{v} \\
+& \nabla \cdot (\rho \vec{v}) = 0
+\end{align*}
+
+Reševali bomo problem dvodimenzionalnega gibanja tekočine v kvadratnem preseku s stranico a, katerega spodnjo stranico premikamo s hitrostjo $v_0$.
+Gibanje nam karakterizira Reynoldsovo število $Re = a \rho v_0 / \eta$.
+S primernimi brezdimenzijskimi spremenljivkami se enačbe glasijo:
+\begin{align*}
+&\frac{\partial u}{\partial t} = - \frac{\partial u^2}{\partial x} - \frac{\partial uv}{\partial y} - \frac{\partial p}{\partial x} + \frac{1}{Re}\left( \frac{\partial^2 u}{\partial x^2} + \frac{\partial ^2 u}{\partial y^2} \right) \\
+&\frac{\partial v}{\partial t} = - \frac{\partial v^2}{\partial y} - \frac{\partial uv}{\partial x} - \frac{\partial p}{\partial y} + \frac{1}{Re}\left( \frac{\partial^2 v}{\partial x^2} + \frac{\partial ^2 v}{\partial y^2} \right) \\
+& \frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = 0
+\end{align*}
+
+
+
+Reševanja se bom lotil z uvedbo tokovne funkcije. Uporabimo definicijo vrinčnosti in z rotorjem delujemo na NS enačbo. Ker je rotor gradienta nič, se tako znebimo tlaka:
+\begin{align*}
+&\zeta = (\nabla \times \vec{v})_z = -\partial u/\partial y + \partial v/ \partial x \\
+&\frac{\partial \zeta}{\partial t} + \frac{\partial(u \zeta)}{\partial x} + \frac{\partial(v \zeta)}{\partial y} - \frac{1}{Re} \nabla^2 \zeta = 0 \\
+&\vec{v} = \nabla \times \psi \\
+&u = \partial \psi / \partial y \\
+&v = -\partial \psi / \partial x \\
+& \nabla^2 \psi = -\zeta
+\end{align*}
+
+Robni pogoj za $\psi$ je, da je na robu nič(s tem zagotovimo, da v steno ni hitrosti). Pogoj za tangentno hitrost ob steni bomo zapisali za ceta, npr. če je pri spodnjem robu hitrost $v_0$:
+\begin{align*}
+v_0 &= \partial \psi / \partial y = 1/2h ( \psi_{i,1} - \psi_{i,-1}) \\
+-\zeta_{i0} &= \nabla^2 \psi_{i0} = 1/h^2 (\psi_{i,1} + \psi_{i,-1} + \psi_{i+1,0} + \psi_{i-1,0} - 4 \psi{i,0}) =  1/h^2 (\psi_{i,1} + \psi_{i,-1})\\  
+v_0 &= 1/2h (h^2 \zeta_{i0} + 2 \psi_{i,1}) \\
+\zeta_{i0} &= -2/h^2 ( v_0 h - \psi_{i,1})
+\end{align*}
+
+Enačbo za časovni razvoj cete dobimo z diskretizacijo odvodov:
+\begin{align*}
+&\frac{\partial \zeta}{\partial t} + \frac{\partial(u \zeta)}{\partial x} + \frac{\partial(v \zeta)}{\partial y} - \frac{1}{Re} \nabla^2 \zeta = 0 \\
+&\zeta^{n+1}_{ij} = \zeta^n_{ij} - \frac{\Delta t}{2 \Delta x} \left(u^n_{i+1,j} \zeta^n_{i+1,j} - u^n_{i-1,j} \zeta^n_{i-1,j} + v^n_{i,j+1} \zeta^n_{i,j+1} - v^n_{i,j-1} \zeta^n_{i,j-1} + \frac{2}{Re \Delta x} \left(  \zeta^n_{i+1,j} + \zeta^n_{i-1,j} + \zeta^n_{i,j+1} + \zeta^n_{i,j-1} - 4 \zeta^n_{i,j}\right) \right)
+\end{align*}
+
+Postopek reševanja:
+\begin{itemize}
+\item Začnemo z začetnim pogojem, ko je hitrost tekočine povsod nič, razen ob spodnjem robu, kjer je $v_0$.
+\item Izračunamo funkcijo ceta, in iz nje preko metode reševanja Poissonove enačbe(z metodo SOR) dobimo hitrostni potencial psi. 
+\item Iz enačbe za časovni razvoj cete izračunamo nov ceta in ponavljamo.
+\end{itemize}
+
+Vsi rezultati v tem poročilo so pridobljeni z diskretizacijo mreže 50x50 in časovnim korakom 0.001.
+
+Spodaj so prikazani primeri profilov pri treh različnih Reynoldsovih številih. Za boljši prikaz prilagajam animacije 50Re.mp4, 500Re.mp4, 5000Re.mp4 in 50000Re.mp4. V vsakem primeru spodnji rob vlečemo s hitrostjo ena.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.32\textwidth}
+\includegraphics[width=\linewidth]{50Re.pdf}
+\end{subfigure}
+\begin{subfigure}{.32\textwidth}
+\includegraphics[width=\linewidth]{500Re.pdf}
+\end{subfigure}
+\begin{subfigure}{.32\textwidth}
+\includegraphics[width=\linewidth]{5000Re.pdf}
+\end{subfigure}
+\caption*{Zelo grob prikaz profila pri različnih Reynoldsovih številih. Pri manjših pridemo prej do ravnovesja, a se glavni vrtinec manj premika. Pri višjih dobimo tudi več stranskih vrtincev(Na slikah se tega ne vidi - glej animacijo).}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{Casi.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{CasiLog.pdf}
+\end{subfigure}
+\caption*{Cas do ravnovesja, definirana z vsoto vrtincnosti pod ena z  vecanjem Re zacne zelo mocno narascati. V to, kaj se podrobneje zgodi na stopničasti točki pri okoli Re=4600 se nisem spuščal, izgleda kot da bi imeli dva režima?}
+\end{figure}
+
+\newpage
+Zanima nas tudi strižna sila na drseči se rob, ki jo zračunamo kot $F_x = 1/Re \int_0^1 \partial u / \partial y dx$. Odvode sem aproksimiral kar z prvo diferenco in uporabil trapezno metodo:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{Sile.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{SileLog.pdf}
+\end{subfigure}
+\caption*{Prikaz sile v navadni in log-log skali. Pri majhnih Reynoldsovih številih so še vidni efekti gradienta hitrosti, pri višjih pa je predfaktor 1/Re veliko bolj izrazit.}
+\end{figure}
+
+
+Zanimivo se mi je zdelo pogledati, kako se tekočina odzove, če steno hitro nehamo premikat. Rešitve enačb sem v tem primeru animiral in jih shranil kot "Relaksacija.mp4". Vidi se, da imamo na začetku največji hitrostni profil(največ bele barve), ki se proti koncu manjša. Relaksacija je prikazana tudi na spodnjih grafih:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{Rel.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{RelLog.pdf}
+\end{subfigure}
+\caption*{Pojemanje vrtinčnosti. Grafa ustrezata situaciji, ki je v animaciji. Proti koncu vrtinčnost pada z večjo potenco kot tik po prenehanju premikanja roba.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{RelakCasi.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{RelakCasiLog.pdf}
+\end{subfigure}
+\caption*{Še relaksacija za druge vrednosti parametrov. Relaksacijski čas narašča z Reynoldsovim število, zdi se da linearno, večanje časa pri katerem steno nehamo premikat pa vpliva na naklon premice. Na log skali spet izgleda, da imamo dva režima, ter da pri majhnih Re časi naraščajo z nižjo potenco.}
+\end{figure}
+
+Za konec sem pogledal še primer, ko spodnji rob premikamo oscilajoče z neko frekvenco, ti primeri so zeli lepo vidni tudi na animacijah Oscilacije.mp4:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.32\textwidth}
+\includegraphics[width=\linewidth]{Osc1.pdf}
+\end{subfigure}
+\begin{subfigure}{.33\textwidth}
+\includegraphics[width=\linewidth]{Osc2.pdf}
+\end{subfigure}
+\begin{subfigure}{.33\textwidth}
+\includegraphics[width=\linewidth]{Osc3.pdf}
+\end{subfigure}
+\caption*{Spreminjanje frekvence ne spremeni obnašanja odziva, razen tega, da se seveda celoten graf skrči ali razširi. Opazimo, da se pri vsakem minimumu hitrosti roba(hitrost=0) pri vrtinčnosti pojavi majhen skok preden začne spet slediti robu.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{Osc5.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{Osc6.pdf}
+\end{subfigure}
+\caption*{Pri večjih Reynoldsovih številih, se ta skok poveča.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.89\textwidth}
+\includegraphics[width=\linewidth]{Osc7.pdf}
+\end{subfigure}
+\caption*{Pri tako velikem Reynoldsovem številu še vedno opazimo neke oscilacije, vendar amplitude izgledajo bolj kaotične.}
+\end{figure}
+
+
+
+\end{document}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}
+
+

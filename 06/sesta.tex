@@ -1,0 +1,217 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Parcialne Diferencialne Enačbe: Lastne Rešitve}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Kvadratna opna}
+
+Rešujemo valovno enačbo za opno brez zunanjega tlaka, ki jo poneostavimo z nastavkom:
+\begin{align*}
+&\nabla^2 u = \frac{\rho(x,y) d}{\gamma} \frac{\partial^2 u}{\partial t^2} \\
+&u(x,y,t) = u(x,y) e^{- i \omega t} \\
+&\nabla ^2 u(x,y) = -\frac{\omega^2 \rho(x,y) d}{\gamma} u(x,y) = -k^2(x,y) u(x,y)
+\end{align*}
+
+Kot v prejšnji nalogi, enačbo diskretizirajmo:
+\begin{equation*}
+\frac{u_{i+1,j} + u_{i-1,j} + u_{i,j+1} +u _{i,j-1} - 4u_{ij}}{h^2} = -k_{ij}^2 u_{ij}
+\end{equation*}
+
+Dobili smo posplošen problem lastnih vrednosti
+\begin{equation*}
+Au=\lambda Bu
+\end{equation*}
+Kjer matrika A predstavlja diskretiziran Laplacev operator, matrika B pa krajevno odvisnost gostote.
+
+
+Za začetek si poglejmo primer homogene opne, kjer rešujemo navadni problem lastnih vrednosti $A u = \lambda u$.
+Analitične rešitve poznamo:
+\begin{align*}
+&u(x,y) = sin\left(\frac{\pi n  x}{a}\right)sin\left(\frac{\pi m y}{a}\right) \\
+&k^2_{n,m} = \frac{\pi^2}{a^2}(n^2+m^2)
+\end{align*}
+
+Za začetek bom preizkusil navadno potenčno metodo, kjer delam sledečo iteracijo:
+\begin{equation*}
+b_{k+1} = \frac{(A-\mu I)^{-1} b_k}{||(A-\mu I)^{-1} b_k||}
+\end{equation*}
+Kjer začnemo z poljubnim približkom za lastni vektor $b_0$(jaz bom začel z samimi enicami v vektorju). $\mu$ je naš začetni približek za lastno vrednost, kar bo v mojih primerih 1.
+Po konvergenci imamo lastni vektor $b$, lastno vrednost potem dobimo enostavno iz enacbe $A b = \lambda b$
+
+Preizkusil bom še Rayleighovo iteracijo, kjer sproti popravljamo še lastno vrednost in tako hkrati dobimo še to:
+\begin{align*}
+&b_{k+1} = \frac{(A-\mu_i I)^{-1} b_k}{||(A-\mu_i I)^{-1} b_k||} \\
+&\mu_i = \frac{b_i^T A b_i}{b_i^T b_i} 
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/potencna1.pdf}
+\end{subfigure}
+\caption*{Najprej sem preveril kako hitro konvergirata potencni metodi. Navadna je inverzna iteracija, Rayleigh pa je iteracija z Rayleighovim kvocientom kot opisano zgoraj. Rayleigh konvergira že po 2 iteracijah, metdem ko jih potencna potrebuje priblizno dva krat več. Večjo natančnost bi lahko pridobil z gostejšo diskretizacijo(večjim N)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/potencna2.pdf}
+\end{subfigure}
+\caption*{Sedaj sem pogledal še hitrost metod. Primerjal sem hitrost delanja z sparse in dense matrikami. Gotovo lahko vidimo, da se zelo splača delati s Sparse matrikami.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/potencna3.pdf}
+\end{subfigure}
+\caption*{Prej smo videli, da Rayleigh rabi manj iteracij, da pride do rešitve, vendar rabi več časa na iteracijo. Zato sem tukaj primerjal rayleigha z navadno inverzno iteracijo, oba pri Sparse matrikah. Tukaj sem bolj naivno predpostavljal, da rayleigh pri vseh N konvergira v 2, navadna pa v 6 iteracijah. Za večjo natančnost bi moral nehati z iteracijo, ko bi prišel do določene želene natančnosti}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/diag.pdf}
+\end{subfigure}
+\caption*{Tukaj sem preveril še direktno diagonalizacijo matrike. Vidimo, da je diskretizacija na nekaj 10 točk dovolj, da kar točno zadanemo 3 najnižje(brez upoštevanja degenerirane) frekvence. Ravne horizontalne črte predstavljajo točno rešitev}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/diag2.pdf}
+\end{subfigure}
+\caption*{Tukaj vidim, da s sparse matrikami spet delamo veliko hitreje. Malo me je pa presenetilo, da časovno ne pridobimo veliko, če delamo z metodama, ki sta specializirani za simetrične matrike(eigh,eigsh)}
+\end{figure}
+
+Poglejmo si zdaj nekaj rešitev:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo1.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo3.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo4.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo5.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/homo6.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/opna.pdf}
+\end{subfigure}
+\caption*{Naslednja naloga zahteva, da poiščemo lastna nihanja na takile opni, kjer sta različno obarvana dela različno težka. Gostoto črnega dela bom držal na 1, belega pa bom spreminjal}
+\end{figure}
+
+Na levi so rezultati, kjer je črni del 10 krat lažji na desni pa 10 krat težji od belega:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo1.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo5.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo2.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo6.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo3.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo7.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo4.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/nehomo8.pdf}
+\end{subfigure}
+\end{figure}
+
+\section{Polkrožna opna}
+
+Sedaj bom nalogo ponovil na polkrožni opni z Dirichletovimi robnimi pogoji. Diskretizirajmo Laplacian v polarnih koordinatah:
+\begin{equation*}
+\nabla^2 u_{ij} = \left(\frac{1}{h_r^2} + \frac{1}{2i h_r^2}\right) u_{i+1,j} + \left(\frac{1}{h_r^2} - \frac{1}{2i h_r^2}\right) u_{i-1,j} - 2\left(\frac{1}{h_r^2} + \frac{1}{h_{\varphi}^2 h_r^2 i^2}\right) u_{i,j} + \frac{1}{h_{\varphi}^2 h_r^2 i^2}\left(u_{i,j+1} + u_{i,j-1} \right)
+\end{equation*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{1.pdf}
+\end{subfigure}
+\caption*{Direktna diagonalizacija tukaj zaradi nekega razloga ni našla lastnih vektorjev, zato sem se lotil iskanja rešitve z potenčno metodo. Nisem prepričan, če je ta konvergirala k najnižji frekvenci oziroma če je narisano sploh pravilno. Na sliki dobim čudne črte, ki bi lahko bile posledica tega, da sem tokrat za risanje uporabil contourf namesto imshow.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{3.pdf}
+\end{subfigure}
+\end{figure}
+\end{document}

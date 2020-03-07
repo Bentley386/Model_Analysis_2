@@ -1,0 +1,250 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Metoda končnih elementov: lastne rešitve}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{arabic}
+\section{Polkrožna cev}
+
+Z metodo končnih elementov bomo tokrat reševali Helmholtzovo enačbo $\nabla^2 u +k^2 u = 0$. V šibki formulaciji se ta glasi
+\begin{equation*}
+S(u) = \frac{1}{2} \langle \nabla u, \nabla u \rangle -  \frac{1}{2}\lambda\langle u,u \rangle
+\end{equation*}
+Kjer skalarni produkt definiramo na sledeč način
+\begin{equation*}
+\langle g,h \rangle = \int_\Omega dx g(x) h(x) 
+\end{equation*}
+
+Po metodi Galerkina rešitev naše enačbe zapišemo kot linearno kombinacijo trial funkcij
+\begin{equation*}
+u = \sum_{i=1}^N a_i w_i
+\end{equation*}
+Za funkcije $w_i$ bomo spet vzeli funkcijo, ki je v $x_i$ enaka ena, na sosedih enaka nič, vmes pa linearno narašča.
+
+Če zgornji funkcional variramo dobimo:
+\begin{align*}
+&\sum_{j=1}^N \left(A_{ij} - \lambda B_{ij} \right) a_j = 0 \\
+&A_{ij} = \langle \nabla w_i , \nabla w_j \rangle \\
+&B_{ij} = \langle w_i , w_j \rangle
+\end{align*}
+
+Spet bomo domeno trinagulirali. Matrika A je enaka kot prej, novi so le izvendiagonalni elementi matrike B, ki se glasijo 
+\begin{equation*}
+B_{ij} = \sum S_r / 12
+\end{equation*}
+Kjer gre vsota po vseh trikotnikih na zveznici i-j.
+
+
+
+Najprej bom narisal nekaj slik, pri katerih sem povsod risal z 200 točkami, od tega jih je četrtina bila na robu. Triangulacijo sem delal z scipy-jevo metodo Delaunay, matrični sistem pa na koncu rešil z linalg.solve
+Poiseuillov koeficient sem računal tako, da sem povprečil vrednost pretoka po vseh 3 ogliščih trikotnika, pomnožil s ploščino trikotnika in to seštel po vseh trikotnikih.
+
+Delal bom z točkami porazdeljenimi enakomerno po polkrogu:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/1.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/2.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/3ups.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/3.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/4.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/5.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/6.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/7.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/primerjava.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/primerjava2.pdf}
+\end{subfigure}
+\caption*{Primerjava izračunanih frekvenc z ničlami Besselovih funkcij(analitična rešitev). Na desni vidimo, da relativna napaka počasi raste, najbrž bi jo lahko zmanjšal z izbiro večje matrike.}
+\end{figure}
+\section{Metoda Galerkina}
+
+Isto nalogo bomo zdaj rešili še samo z metodo Galerkina.
+Naše poskusne funkcije so:
+\begin{equation*}
+w_{m,k} (r, \varphi) = r^{m+k}(1-r)sin(m \varphi)
+\end{equation*}
+Kjer sta m in k naravni števili(k je lahko tudi nič). Takšne funkcije vse zadoščajo našim robnim pogojem.
+
+Rešujemo torej spet $\nabla^2 u - k^2 u = 0$
+Delali bomo kar na kvadratni mreži, kjer so integrali preprostejši.
+Analitično lahko dobimo:
+\begin{align*}
+&A_{(m,k),(n,l)} = \int r dr d\varphi \  \nabla w_{mk} \nabla w_{nl} \\
+&A_{(m,k),(n,l)} = \delta_{mn} \frac{\pi}{2} \frac{(1+2m)(l+2m) + k(1+2l+2m)}{(k+l+2m)(1+k+l+2m)(2+k+l+2m)}\\
+&B_{(m,k),(n,l)} = \int r dr d\varphi  \ w_{mk} w_{nl} \\
+&B_{(m,k),(n,l)} = \delta_{mn}\frac{\pi}{2} \left(\frac{1}{2m+k+l+2} - \frac{2}{2m+k+l+3} + \frac{1}{2m+k+l+4} \right)
+\end{align*}
+
+Sedaj pa še nekaj slik, kjer sem narisal 10000 točk. Številke m in k v naslovih povejo do kje sem vzel bazne funkcije.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/1.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/2.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/3.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/4.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/5.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/6.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+
+Izgleda, da metoda deluje dobro, tudi pri nižjih m in k. Poskusil bom to preveriti še malo bolj sistematično:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/primerjava.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/primerjava2.pdf}
+\end{subfigure}
+\caption*{Na levi vidimo, da lastna vrednost sploh ni odvisna od števila m, če je to le več kot 0. Na desni pa vidimo, da so relativne napake spet zelo majhne a ne naraščajo kot prej, ampak imajo bolj nepravilno odvisnost.}
+\end{figure}
+
+Poglejmo kako se obnese slabša izbira trial funkcij:
+\begin{align*}
+&w_{m,k}(r,\varphi) = sin(k\pi r/R) sin(m \varphi) \\ 
+& \nabla w_{m,k} = \frac{\pi k}{R} cos(k \pi r/R) sin(m \varphi) + \frac{sin(k \pi r/R)}{r} m cos(m \varphi)
+\end{align*}
+
+Skalarne produkte sem pri teh funkcijah računal kar numerično z Gaussovo kvadraturo(Čeprav verjetno obstaja tudi analitična formula).
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/sin.png}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/sin2.png}
+\end{subfigure}
+\caption*{Tudi taka izbira baznih funkcij kar v redu deluje!}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/sinprimerjava.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/sinprimerjava2.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{druga/sinprimerjava3.pdf}
+\end{subfigure}
+\caption*{Pri m=k=5 je napaka kar velika in se veča. Pri m=k=10 pa zgleda stvar bolj v redu, vidimo tudi, da imajo outlierji manjšo napako kot prej.}
+\end{figure}
+
+Za na konec sem preizkusil še trial funkcije v radialni smeri izbrati kot piramidalne funkcije, ki so 0 na robu, 1 na k/10 ter linearne vmes. Integrale sem spet izračunal numerično v kotni odvisnosti pa sem obdržal sinus. 
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/idk.png}
+\end{subfigure}
+\caption*{}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/idk2.pdf}
+\end{subfigure}
+\caption*{Izgleda, da se le za prvo lastno vrednost dobro izide.}
+\end{figure}
+\end{document}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{prva/random.pdf}
+\end{subfigure}
+\caption*{Slika je malce drugačna kot prej. Napak se ustali šele pri m=2, z k-jem pa se seveda manjša, vendar ostane večja kot pri prejšnjih funkcijah. }
+\end{figure}

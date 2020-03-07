@@ -1,0 +1,177 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Lastne energije Schrödingerjeve enačbe}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+\section{Coulombski potencial}
+Obravnavamo delec v Coulomskem potencialu.
+Enačba za radialni del rešitve je
+\begin{equation*}
+\left( - \frac{d^2}{dx^2} - \frac{2}{x} + \frac{l(l+1)}{x^2} - e \right) R(x) = 0
+\end{equation*}
+
+Pripadajoči robni pogoji so $R(0)=R(\infty)=0$
+
+Poleg streljanja z metodo Runge Kutta bom uporabljal tudi metodo Numerova, ki je primerna za probleme tipa
+\begin{equation*}
+\left( \frac{d^2}{dx^2} + k^2(x) \right) y(x) = 0
+\end{equation*}
+Metoda Numerova je dvokoračna petega reda, rešitev se napiše kot
+\begin{equation*}
+y_{i+1} = \frac{1}{1+\frac{h^2}{12}k_{i+1}^2} \left( 2\left(1-\frac{5h^2}{12}k_i^2 \right) y_i - \left( 1 + \frac{h^2}{12}k_{i-1}^2 \right ) y_{i-1} \right)
+\end{equation*}
+
+
+
+Ker za metodo Numerova potrebujem dve začetni točki, bom rešitev za male argumente razvil v vrsto:
+\begin{equation*}
+R(x) = \sum_{k=0}^{4} a_k x^k
+\end{equation*}
+
+Če ta nastavek vstavim v diferencialno enačbo, dobim:
+\begin{align*}
+l=0;\ \  & a_0 = 0, a_1=1, a_2 = -1, a_3=(2-e)/6, a_4=(2e-1)/18, a_5 = (3e^2 - 10e + 2)/360 \\
+l=1;\ \  & a_0 = 0, a_1=0, a_2 = 1, a_3=-0.5, a_4=(1-e)/10, a_5 = (7e-2)/180 \\
+l=2;\ \  & a_0 = 0, a_1=0, a_2 = 0, a_3=1, a_4=-1/3, a_5 = (2/3-e)/14 \\
+\end{align*}
+
+Za začetek bom pogledal metodo Runge-Kutta, ki smo jo uporabljali v večini primerov doslej. Rešujem sistem:
+\begin{align*}
+&\dot{R(x)} = v\\
+&\dot{v(x)} = -\frac{2}{x} R + \frac{l(l+1)}{x^2}R - e R  
+\end{align*}
+
+Metodi bom preveril s primerjavo z znanimi rešitvimi(Ki sem jih normaliziral da velja $\int |R|^2 dx = 1$, isto kot v mojem programu):
+\begin{align*}
+&R_{10} = 2 x e^{-x} \\
+&R_{20} = \frac{1}{\sqrt{2}}x(1-0.5x)e^{-x/2} \\
+&R_{21} = \frac{1}{\sqrt{24}}x^2 e^{-x/2}
+\end{align*}
+
+Nalogo bom reševal tako, da bom upošteval, da za rešitve te enačbe velja, da je število ničel enako $n-l$. Ker je desni robni pogoj tako zoprn, bom torej začel z dvema robnima energijama -2 in 0, in delal bisekcijo, dokler ne zadanem pravega števila ničel. Potem pa še preveril ali stvar divergira(treba bo poskusiti več maskimalnih razdalj integracije, da ne bomo šli predaleč, kjer zaradi numerične napake pridemo v divergeno in da hkrati ne gremo premalo daleč, kjer ne bomo še prišli čez vse ničle.
+
+Poglejmo kako izgleda nekaj rešitev:
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.85\textwidth}
+\includegraphics[width=\linewidth]{prva/l0.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{0.85\textwidth}
+\includegraphics[width=\linewidth]{prva/l1.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.9\textwidth}
+\includegraphics[width=\linewidth]{prva/l2.pdf}
+\end{subfigure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/energije.pdf}
+\end{subfigure}
+\caption*{Še hiter test pravilnosti metode. Pogledal sem kako se energije pri l=0(črne pike) in l=2(rdeče pike) ujemajo z teoretično napovedjo, ki sem jo razširil na zvezen n ($e=-n^{-2}$)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/odh.pdf}
+\end{subfigure}
+\caption*{Absolutna napaka v odvisnoti od velikosti koraka. Z večanjem koraka se po pričakovanjih napaka povečuje, s tem da je(malo) manjša pri funkciji z l=1, kot l=0. Vidimo tudi, da maskimalna napaka ni pretirano  večja od povprečne napake. Povprečenje je tukaj po vseh točkah x.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/odeps.pdf}
+\end{subfigure}
+\caption*{Odvisnost napake od tolerance, pri kateri končamo bisekcijo in rečemo, da smo našli energijo. Vidimo, da je odvisnost kar močna in bi moral tekom cele naloge malo bolj paziti in vzeti še manjšo toleranco(napake pri prejšnjem grafu bi bile tako tudi nižje, kjer sem vzel nekje $10^{-6}$)}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/odst.pdf}
+\end{subfigure}
+\caption*{Pri metodi Numerova za izračun druge začetne točke uporabim razvoj v vrsto, ki sem ga napisal na prvi strani. Tukaj sem gledal, kako se napaka spreminja, če vzamem različno število členov v mojem razvoju. Na x osi je označeno število neupoštevanih členov od šeštih izračunanih. X os gre le do 4, ker bi st=5 ustrezala situacija, kjer upoštevam le vodilni člen, ki je v vseh primerih bil 0. Torej delam metodo Numerova, kjer sta obe prvi točki enaki 0, kar ne da nobenega smiselnega rezultata. Poleg tega pa sploh ne zgleda, da je čisto važno kaj izberem za drugo točko.}
+\end{figure}
+
+
+\newpage
+\section{Propagacija svetlobe}
+
+Vemo da za propagacijo monokromatske svetlobe velja enačba naslednje oblike:
+\begin{equation*}
+(\nabla^2 + n(r)^2 k^2) \Psi (r) = 0
+\end{equation*}
+
+Z nastavkom $\Psi = (R(x)/\sqrt{x}) e^{i \lambda z}$ jo preoblikujemo v 
+\begin{equation*}
+\left(\frac{d^2}{dx^2} + \frac{1}{4x^2} + n(x)^2 k^2 - \lambda^2 \right) R(x) = 0
+\end{equation*}
+
+Odvisnost lomnega količnika je
+\begin{equation*}
+n(x) = \begin{cases}
+2-0.5x^2 & x < 1 \\
+1 & x \geq 1
+\end{cases}
+\end{equation*}
+Rešitve so podobne kot v prvi nalogi v smislu, da imamo pri fiksnem k poleg osnovnega tudi vzbujena stanja z višjo lambdo. Malo bom zlorabljal jezik in tudi tukaj govoril o stanjih, čeprav to ni več kvantni problem kot v prvi nalogi.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/osnovna.pdf}
+\end{subfigure}
+\caption*{Vidimo, da so nekatere rešitve le "hribček", druge pa malo večkrat zaoscilirajo. V tem primeru je bilo treba biti veliko bolj pazljiv kot pri prvi nalogi, ker so funkcije hitro začele divergirat. Zato izgleda morda malo grdo, ko jih skušam tako skupaj narisati.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/prva.pdf}
+\end{subfigure}
+\caption*{Tukaj so narisane rešitve, kjer za fiksen k dobim vsaj 2 lambdi. Prikazane so rešitve z višjo lambdo.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\includegraphics[width=\linewidth]{druga/disperzija.pdf}
+\end{subfigure}
+\caption*{Disperzija. Kakor sem risal (za vsako "družino stanj" posebej) dobimo nekakšne zlepke linearnih funkcij. Pri stanjih z najnižjo lambdo(modra črta) za male k, kjer sem bolj na gosto risal, vidimo, da ni čisto linearno ampak da disperzija malo zavije.}
+\end{figure}
+
+\end{document}

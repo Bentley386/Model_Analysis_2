@@ -1,0 +1,197 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[slovene]{babel}
+\usepackage{geometry}
+\usepackage{physics}
+\usepackage{mathrsfs}
+\geometry{margin=1in}
+
+\title{Navadne diferencialne enačbe: začetni problem}
+\author{Andrej Kolar-Požun, 28172042}
+
+
+
+\errorcontextlines 10000
+\begin{document}
+\pagenumbering{gobble}
+\maketitle
+\newpage
+\pagenumbering{arabic}
+\section{Tir planeta okoli sonca}
+
+Začnimo z modelom gibanja planeta okoli mirujočega sonca. Hamiltonjan za ta problem je
+\begin{equation*}
+H = \frac{p_x^2 + p_y^2}{2m} - \frac{GmM}{r}
+\end{equation*}
+Kjer je r radij vektor planeta(sonce smo postavili v koordinatno izhodišče). Zaradi enostavnosti bom postavil $m=1$ in $GM = 1$.
+Sledijo enačbe gibanja:
+\begin{align*}
+&\dot{x} = u \\
+&\dot{y} = v \\
+&\dot{u} = -\frac{x}{(x^2 + y^2)^{3/2}} \\
+&\dot{v} = -\frac{y}{(x^2 + y^2)^{3/2}} \\
+\end{align*}
+
+Poglejmo najprej kako orbite sploh izgledajo. Uporabil bom Leapfrog metodo:
+\begin{align*}
+&\vec{q}_{n+0.5} = \vec{q}_n - 0.5 h \ \vec{p}_n \\
+&\vec{p}_{n+1} = \vec{p}_n - h \grad (\vec{q}_{n+0.5}) \\
+&\vec{q}_{n+1} = \vec{q}_{n+0.5} + 0.5 h \ \vec{p}_{n+1} \\
+\end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/2.pdf}
+\end{subfigure}
+\caption*{Nekaj trajektorij. Kot vemo, je orbita za $v_0<1$ in $1<v_0 < \sqrt{2}$ eliptična, za $v_0=1$ krožna, za $v_0 > \sqrt{2}$ pa hiperbolična. Oranžna orbita na sliki je večja elipsa, ki se potem kmalu spremeni v parabolo ($v_0 = \sqrt{2}$). Tukaj sem uporabil Leapfrog metodo.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/1.pdf}
+\end{subfigure}
+\begin{subfigure}{.49\textwidth}
+\includegraphics[width=\linewidth]{prva/3.pdf}
+\end{subfigure}
+\caption*{Tukaj sem pri fiksni začetni velikosti hitrosti spreminjal njen kot. Kot je merjen od navpičnice. Vidimo, da imamo spet nek prehod med stabilnimi in nestabilnimi orbitami.}
+\end{figure}
+
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/kepler.pdf}
+\end{subfigure}
+\caption*{Mimogrede lahko preverimo še enega izmed Keplerjevih zakonov, ki pravi, da je obhodni čas planeta enak $T=2 \pi a^{3/2}$, kjer je a velika polos eliptične orbite. Vidimo, da trend simulacij sovpada z keplerjevim zakonom. Obhodni čas in veliko polos sem preprosto izračunal tako, da sem integrator pognal pri manjšem časovnem koraku(0.005) in pogledal pri katerem času pride na 0.01 blizu začetni legi.}
+\end{figure}
+
+Preden podrobneje analiziramo orbite, moramo najprej preveriti stabilnost naših metod. Leapfrog bom tukaj še primerjal z znano Runge Kutta metodo. Stabilnost bom tukaj analiziral z opazovanjem energije.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/et.pdf}
+\end{subfigure}
+\caption*{Tukaj se vidi zakaj je leapfrog metoda dobra za take probleme. Metoda je simplektična, kar pomeni, da ohranja energijo. Za majhne čase energija pri leapfrogu malce oscilira in na hitro zgleda, kot da ima Runge Kutta manjšo napako, a če počakamo več časa, vidimo, da napaka RK metode s časom narašča, leapfrog pa se ne spreminja.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/eh.pdf}
+\end{subfigure}
+\caption*{Pomemben del grafa je pri manjših korakih, kjer sta metodi zelo natančni(najmanjši korak na sliki je 0.001). Torej bom z izbiro manjšega koraka lahko prišel do natančnih rezultatih. Vidimo pa, da je pri majhnih časih RK praviloma boljša kot Leapfrog. Opozorilo: odvisnost metode RK od h je tukaj zavajujoča saj sem uporabljal pythonovo scipy knjižnico, ki uporablja adaptiven korak, torej h tukaj le predstavlja nekakšen sampling rate.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/ev.pdf}
+\end{subfigure}
+\caption*{Pri majhnih začetnih hitrostih je napaka veliko večja, kot pri velikih. Tukaj(ker smo še vedno pri majhem času) Runge Kutta zmaga.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/ef.pdf}
+\end{subfigure}
+\caption*{Še napaka energije v odvisnot od začetne smeri hitrosti, kjer je velikost hitrosti 1. Kot merim iz navpičnice. Za velike kote je po tolikem času napaka že kar velika, če bi hotel take orbite res podrobno obravnavati bi morl vzeti še manjši časovni korak.}
+\end{figure}
+
+Metoda Runge Kutta se torej za male čase načeloma bolje odreže in zagotavlja večjo natančnost. Slabost je le, da se napaka s časom napihuje. Leapfrog zahteva manjše korake za boljšo natačnost, ampak smo pa lahko bolj prepričani, da se ta natančnost s časom ne bo spreminjala.
+
+
+Naša naslednja naloga je ugotoviti kdaj so orbite stabilne. Ne bom se obremenjeval s podrobnostmi(ali je hiperbolična ali parabolična), zanima nas le, kdaj je gibanje periodično in kdaj ni. Tega se bom lotil enostavno tako, da bom pri določenih pogojih do določenega časa integriral enačbo gibanja in pogledal ali se planet nahaja dlje od sonca od določene razdalje. Če se, bom sklepal, da je šel po neki hiperbolični orbiti in zaključil, da gibanje ni periodično.
+
+Prej smo videli, da imajo največje orbite velike polosi reda velikosti 1, obhodni čas pa reda velikosti 10. Integriral bom do časa 200, saj je takrat planet na nestabilni orbiti že dovolj daleč, pogoj za nestabilno orbito pa bo, da je ob tem času za več kot 10 oddaljen od sonca, saj je to za približno faktor 10 večje od največje prej opažene elipse.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/stabilnost.png}
+\end{subfigure}
+\caption*{Na sliki so z zeleno pobarvana območja, kjer je orbita stabilna, z rdečo pa kjer ni. Na x osi je kot začetne smeri hitrosti, na y pa njena velikost. Kot štejemo v pozitivni smeri. Pri majhnih hitrostih v kombinaciji z velikim kotom delue metoda dokaj slabo(treba bi se bilo bolj posvetiti, narisati trajektorijo in pogledati pri manjšem številu obhodov), zato je možno, da je katero izmed rdečih območij na sliki v resnici stabilno, obratno pa ni res.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/stabilnost2.png}
+\end{subfigure}
+\caption*{Ista slika kot prej, le da štejemo kot v negativni smeri od navpičnice. Zanimivo, da je stabilnostna slika približno enaka, torej je hitrost še dovolj majhna da planet ostane v orbiti.}
+\end{figure}
+
+Tukaj je na preprostem primeru še potrditev, da se poleg energije ohranjata tudi vrtilna količina $\vec{L} = \vec{r} \times \vec{p}$ in Runge-Lenzov vektor 
+$\vec{A} = \vec{p} \times \vec{L} - \vec{r}/r$.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/ohranjene.pdf}
+\end{subfigure}
+\caption*{Te količine se res ohranjajo. Komponenti Runge-Lenzovega vektorja sta obe enaki nič.}
+\end{figure}
+\newpage
+\section{Problem treh teles}
+
+Spet imamo planet, ki kroži okoli sonca mimo njuju pa v ravni liniji prileti še eno sonce z isto maso. Interakcijo med soncama bomo zanemarili, izberimo si še, da se mimobežno sonce premika z dvakratno hitrostjo planeta, potuje pa na liniji, ki je za 1.5 radija orbite planeta oddaljena od mirujočega sonca.
+Potencial, katerega čuti planet se spremeni:
+\begin{equation*}
+V(x,y,t) = -\frac{1}{\sqrt{x^2+y^2}} - \frac{1}{\sqrt{(y-1.5a)^2 +(x-(X_0 + 2v_0 t))^2}}
+\end{equation*}
+Uporabljal bom Leapfrog metodo, torej bom potreboval še gradient potenciala:
+\begin{align*}
+&\frac{\partial V}{\partial x} = \frac{x}{(x^2 + y^2)^{3/2}} + \frac{(x-(X_0 + 2v_0 t)}{((y-1.5a)^2 +(x-(X_0 + 2v_0 t))^2)^{3/2}}\\
+&\frac{\partial V}{\partial y} = \frac{y}{(x^2 + y^2)^{3/2}} + \frac{y-1.5a}{((y-1.5a)^2 +(x-(X_0 + 2v_0 t))^2)^{3/2}}\\
+\end{align*}
+
+Ko pride drugo sonce mimo se lahko zgodi, da bo planet še vedno krožil okoli prvotnega sonca. Lahko pa bo mimobežno sonce planet vzelo in bo krožil okoli njega. Zadnja možnost je, da bo planet odletel nekam stran od obeh sonc. Na naslednjih slikah bom pokazal, kdaj se zgodi kateri izmed teh treh režimov, v odvisnosti od začetne pozicije planeta(merjenjo v kotih, velikost hitrosti bo zmeraj 1, prav tako pa oddaljenost od mirujočega sonca) in hitrosti mimobežnega sonca.
+
+Klasifikacija režima bo potekala na naslednji način: Če je celotna energija pozitivna bom rekel, da je planet zbežal v neko nestabilno orbito. Če je negativna, pa bo v stabilni orbiti okoli enega izmed planetov - odvisno kateri ima nižjo potencialno energijo.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/rezimi.png}
+\end{subfigure}
+\caption*{Na x osi je začetna pozicija planeta, na y osi pa hitrost mimobežnega sonca. Rdeča barva pomeni, da je planet odletel stran od obeh sonc, zelena pa da je stabilno ostal pri prvem soncu. Hitrost je zmeraj orientirana pozitivno. Vidimo, da se nikoli ne zgodi, da bi planet začel krožiti okoli drugega sonca. Zaradi estetskih razlogov je slika raztegnjena v navpični smeri.}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/rezimi2.png}
+\end{subfigure}
+\caption*{Tukaj je hitrost orientirana v negativni smeri. Modra barva prikazuje režim, ko planet pristane na stabilni orbiti okoli drugega sonca. Vidimo, da se to zgodi pri dovolj nizkih hitrostih mimobežnega sonca.}
+\end{figure}
+
+
+
+Zgornji trije režimi so vidni na priloženih animacijah nestabilna.mp4, stabilna1.mp4 in stabilna2.mp4
+V napacna.mp4 lahko vidimo kaj zabavnega se zgodi, če ne pazimo in ne ustavimo simulacije, ko planet pade "v sonce".
+
+Naredimo še kakšen dejanski problem več teles. Poglejmo si na primer binarno zvezdo.
+Dve enaki masi imamo na koordinatah (1,0) in (-1,0). Začneta se premikati v nasprotnih smereh okoli skupnega središča, kot je prikazano na animaciji binarna.mp4
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.7\textwidth}
+\includegraphics[width=\linewidth]{prva/birnani.png}
+\end{subfigure}
+\caption*{Tukaj je analiza stabilnosti za začetni lokaciji zvezd (1,0),(-1,0). Na x osi je kot za katerega sta na začetku zvezdi nagnjeni proti sredini, na y osi pa njuna začetna hitrost}
+\end{figure}
+
+Na animaciji tri.mp4 sem poskusil simulirati še problem treh teles, ko mimo binarne zvezde pride še ena zvezda z isto maso. Dobimo zanimivo situacijo, pri kateri se binarna zvezda nekako kot sistem premika in zvezdi krožita druga okoli druge. Po določenem času pa metoda zataji, kar vidimo po tem, da se energija znatno spremeni. V animaciji so na spodnjem grafu prikazane kinetične energije posameznih sonc ter skupna potencialna energija vseh treh sonc. 
+
+
+\end{document}
